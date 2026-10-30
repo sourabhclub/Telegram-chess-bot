@@ -316,7 +316,7 @@ function onSquareClick(square){
     return;
   }
 
-  if(game.isGameOver()){
+  if(game.game_over()){
     setStatus("Game over. Find an opponent for a new game.");
     return;
   }
@@ -485,7 +485,7 @@ function connectServer(){
     legalMoves = [];
     renderBoard();
 
-    if(data.game_over || game.isGameOver()){
+    if(data.game_over || game.game_over()){
       setStatus("Game over! Result: " + (data.result || gameResult()));
     }else{
       setStatus(
