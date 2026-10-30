@@ -74,7 +74,7 @@ let serverUrl=localStorage.getItem("chessServerUrl");
 if(!serverUrl){
 serverUrl=prompt("Enter your deployed chess server URL (https://...)");
 if(!serverUrl) return;
-serverUrl=serverUrl.trim().replace(//+$/,"");
+serverUrl=serverUrl.trim().replace(/\/+$/,"");
 localStorage.setItem("chessServerUrl",serverUrl);
 }
 socket=io(serverUrl,{transports:["websocket","polling"]});
