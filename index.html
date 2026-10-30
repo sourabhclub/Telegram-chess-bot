@@ -310,6 +310,7 @@ function updateDetails(){
 }
 
 function onSquareClick(square){
+  setStatus("Tap: " + square + " | gameId: " + gameId + " | myColor: " + myColor + " | turn: " + game.turn());
   if(!gameId || !myColor){
     setStatus("Game not started. Find an opponent first.");
     return;
