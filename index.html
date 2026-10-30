@@ -289,7 +289,10 @@ function renderBoard(){
         el.appendChild(pieceImage(piece));
       }
 
-      el.addEventListener("click", () => onSquareClick(square));
+      el.addEventListener("click", () => {
+  setStatus("CLICK WORKING: " + square);
+  onSquareClick(square);
+});
       boardBox.appendChild(el);
     }
   }
