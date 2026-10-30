@@ -308,22 +308,24 @@ function updateDetails(){
 }
 
 function onSquareClick(square){
-  setStatus("Square tapped: " + square);
   if(!gameId || !myColor){
-    setStatus("Tap Find Opponent to start a game.");
+    setStatus("Game not started. Find an opponent first.");
     return;
   }
 
   if(game.isGameOver()){
-    setStatus("Game over. Tap Find Opponent for a new game.");
+    setStatus("Game over. Find an opponent for a new game.");
     return;
   }
 
   if(game.turn() !== myColor){
-    setStatus("Wait for your opponent's move.");
+    setStatus("Opponent's turn.");
     return;
   }
 
+  const piece = game.get(square);
+
+  // If a piece is already selected, try moving it.
   if(selected && legalMoves.some(m => m.to === square)){
     const moves = legalMoves.filter(m => m.to === square);
 
@@ -338,22 +340,25 @@ function onSquareClick(square){
     return;
   }
 
-  const piece = game.get(square);
-
+  // Select your own piece.
   if(piece && piece.color === myColor){
     selected = square;
     legalMoves = game.moves({
-      square:square,
-      verbose:true
+      square: square,
+      verbose: true
     });
+
     renderBoard();
+    setStatus("Selected " + square + ". Choose a highlighted square.");
     return;
   }
 
+  // Deselect when an invalid square is tapped.
   selected = null;
   legalMoves = [];
   renderBoard();
-}
+  setStatus("Select one of your own pieces.");
+  }
 
 function choosePromotion(type){
   if(!pendingPromotion) return;
