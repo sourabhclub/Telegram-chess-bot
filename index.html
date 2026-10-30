@@ -342,6 +342,7 @@ function onSquareClick(square){
 
   // Select your own piece.
   if(piece && piece.color === myColor){
+    setStatus("Piece found: " + square + ", piece=" + piece.type + ", color=" + piece.color);
     selected = square;
     legalMoves = game.moves({
       square: square,
