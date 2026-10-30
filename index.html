@@ -10,7 +10,7 @@
 body{margin:0;padding:16px 10px;background:#101820;color:white;font-family:Arial,sans-serif;text-align:center}
 h1{color:#8de0b2;margin-bottom:5px}
 #status{background:#202d38;padding:13px;border-radius:9px;margin:15px auto;max-width:440px}
-#board{width:min(94vw,440px);aspect-ratio:1;display:grid;grid-template-columns:repeat(8,1fr);margin:15px auto;border:3px solid #ddd}
+#board{width:min(94vw,440px);aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));margin:15px auto;border:2px solid #ddd;box-sizing:border-box;overflow:hidden}
 .square{display:flex;align-items:center;justify-content:center;position:relative;font-size:clamp(27px,8vw,45px);cursor:pointer;user-select:none}
 .light{background:#f0d9b5}
 .dark{background:#779556}
