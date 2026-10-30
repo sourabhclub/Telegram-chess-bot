@@ -487,12 +487,18 @@ function connectServer(){
 
     if(data.game_over || game.game_over()){
       setStatus("Game over! Result: " + (data.result || gameResult()));
-    }else{
-      setStatus(
+    }else if(game.isCheck()){
+    setStatus(
         game.turn() === myColor
-          ? "Your turn."
-          : "Opponent's turn."
-      );
+            ? "Check! Your king is under attack."
+            : "Check! Opponent's king is under attack."
+    );
+}else{
+    setStatus(
+        game.turn() === myColor
+            ? "Your turn."
+            : "Opponent's turn."
+    );
     }
   });
 
