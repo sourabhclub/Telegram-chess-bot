@@ -308,6 +308,7 @@ function updateDetails(){
 }
 
 function onSquareClick(square){
+  setStatus("Square tapped: " + square);
   if(!gameId || !myColor){
     setStatus("Tap Find Opponent to start a game.");
     return;
