@@ -10,10 +10,17 @@ app.config["SECRET_KEY"] = os.environ.get(
     "SECRET_KEY", secrets.token_hex(32)
 )
 
-socketio = SocketIO(app, cors_allowed_origins="*")
-
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    manage_session=False,
+    ping_interval=25,
+    ping_timeout=60,
+    async_mode="threading"
+)
 waiting_player = None
 games = {}
+player_sessions = {}
 
 
 @app.get("/")
@@ -146,7 +153,13 @@ def make_move(data):
     }
 
     emit("game_state", result, to=game_id)
+@socketio.on("disconnect")
+def handle_disconnect():
+    global waiting_player
+    sid = request.sid
 
+    if waiting_player == sid:
+        waiting_player = None
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5000"))
