@@ -1,204 +1,577 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chess Arena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Sourabh Chess</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;padding:16px 10px;background:#101820;color:white;font-family:Arial,sans-serif;text-align:center}
-h1{color:#8de0b2;margin-bottom:5px}
-#status{background:#202d38;padding:13px;border-radius:9px;margin:15px auto;max-width:440px}
-#board{width:min(94vw,440px);aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));margin:15px auto;border:2px solid #ddd;box-sizing:border-box;overflow:hidden}
-.square{display:flex;align-items:center;justify-content:center;position:relative;font-size:clamp(27px,8vw,45px);cursor:pointer;user-select:none}
+
+body{
+  margin:0;
+  padding:16px 10px 30px;
+  background:#101820;
+  color:white;
+  font-family:Arial,sans-serif;
+  text-align:center;
+}
+
+h1{
+  color:#8de0b2;
+  margin:4px 0;
+  font-size:30px;
+}
+
+.subtitle{
+  color:#bdcbd5;
+  margin:6px 0 16px;
+}
+
+#status{
+  background:#202d38;
+  border:1px solid #354653;
+  padding:13px 10px;
+  border-radius:10px;
+  margin:12px auto;
+  max-width:440px;
+  min-height:45px;
+  font-size:14px;
+}
+
+#board{
+  width:min(94vw,440px);
+  height:min(94vw,440px);
+  display:grid;
+  grid-template-columns:repeat(8,minmax(0,1fr));
+  grid-template-rows:repeat(8,minmax(0,1fr));
+  margin:14px auto;
+  border:3px solid #d5dce0;
+  border-radius:2px;
+  overflow:hidden;
+  touch-action:manipulation;
+}
+
+.square{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  min-height:0;
+  cursor:pointer;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+
 .light{background:#eeeed2}
 .dark{background:#769656}
-.selected{background:#e8d45b!important}
- .white-piece{color:#fff;-webkit-text-stroke:0.7px #20252b;text-shadow:0 1px 2px #333;font-size:clamp(27px,8vw,45px);line-height:1;user-select:none}
-.black-piece{color:#20252b;text-shadow:0 1px 1px #ffffff;font-size:clamp(27px,8vw,45px);line-height:1;user-select:none}
-.legal:after{content:"";position:absolute;width:23%;height:23%;border-radius:50%;background:#253b3580}
-button{background:#8de0b2;color:#10251b;border:0;border-radius:8px;padding:12px 16px;margin:5px;font-weight:bold;font-size:15px}
-button:disabled{opacity:.5}
-.note{font-size:12px;color:#b8c5d1}
- .piece-image{
-  width:90%;
-  height:90%;
+
+.square.selected{
+  background:#f6f669!important;
+}
+
+.piece-image{
+  width:94%;
+  height:94%;
   object-fit:contain;
-  display:block;
   pointer-events:none;
   user-select:none;
- }
+  -webkit-user-drag:none;
+}
+
+.legal::after{
+  content:"";
+  position:absolute;
+  width:25%;
+  height:25%;
+  border-radius:50%;
+  background:#203b3280;
+  pointer-events:none;
+}
+
+.legal.capture::after{
+  width:85%;
+  height:85%;
+  background:transparent;
+  border:4px solid #203b3280;
+}
+
+button{
+  background:#8de0b2;
+  color:#10251b;
+  border:0;
+  border-radius:9px;
+  padding:13px 17px;
+  margin:5px 3px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  min-height:44px;
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:default;
+}
+
+.secondary{
+  background:#354653;
+  color:white;
+}
+
+#details{
+  max-width:440px;
+  margin:10px auto;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  font-size:13px;
+  color:#d0dbe2;
+}
+
+.note{
+  color:#9fb0bc;
+  font-size:12px;
+  line-height:1.5;
+  max-width:440px;
+  margin:12px auto;
+}
+
+#promotionBox{
+  display:none;
+  margin:10px auto;
+}
+
+#promotionBox button{
+  padding:8px 13px;
+  font-size:22px;
+}
+
+@media(max-width:360px){
+  h1{font-size:26px}
+  button{padding:11px 12px;font-size:14px}
+}
 </style>
 </head>
+
 <body>
-<h1>♟ Chess Arena</h1>
-<p>Online Multiplayer Chess</p>
-<div id="status">Connect to your chess server to begin.</div>
-<div id="board"></div>
-<button id="findBtn" onclick="findMatch()">Find Opponent</button>
-<button onclick="flipBoard()">Flip Board</button>
-<p class="note">Select a piece, then select its destination.</p><script>
-const statusBox=document.getElementById("status");
-const boardBox=document.getElementById("board");
-const findBtn=document.getElementById("findBtn");
 
-const game=new Chess();
-const symbols={
- w:{k:"♔",q:"♕",r:"♖",b:"♗",n:"♘",p:"♙"},
- b:{k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"}
-};
-const pieceSVG = {
-  w: {
-    fill: "#ffffff",
-    stroke: "#20252b"
-  },
-  b: {
-    fill: "#20252b",
-    stroke: "#ffffff"
-  }
-};
-let socket=null;
-let gameId=null;
-let myColor=null;
-let selected=null;
-let legalMoves=[];
-let flipped=false;
-let connected=false;
+<h1>♟ Sourabh Chess</h1>
+<p class="subtitle">Online Multiplayer Chess</p>
 
-function setStatus(text){statusBox.textContent=text}
+<div id="status">Connecting to chess server...</div>
 
-function connectServer(){
-if(socket) return;
-let serverUrl=localStorage.getItem("chessServerUrl");
-if(!serverUrl){
-serverUrl=prompt("Enter your deployed chess server URL (https://...)");
-if(!serverUrl) return;
-serverUrl=serverUrl.trim().replace(/\/+$/,"");
-localStorage.setItem("chessServerUrl",serverUrl);
-}
-socket=io(serverUrl,{transports:["websocket","polling"]});
+<div id="details">
+  <span id="colorInfo">Color: —</span>
+  <span id="turnInfo">Turn: White</span>
+</div>
 
- socket.on("connect",()=>{
-  connected=true;
-  setStatus("Connected! Tap Find Opponent.");
-  findBtn.disabled=false;
- });
+<div id="board" aria-label="Chess board"></div>
 
- socket.on("connect_error",()=>{
-  setStatus("Cannot connect. Check your server URL and hosting.");
- });
+<div id="promotionBox">
+  <p>Choose promotion:</p>
+  <button onclick="choosePromotion('q')">♕</button>
+  <button onclick="choosePromotion('r')">♖</button>
+  <button onclick="choosePromotion('b')">♗</button>
+  <button onclick="choosePromotion('n')">♘</button>
+</div>
 
- socket.on("waiting",()=>{
-  setStatus("Waiting for an opponent...");
- });
+<div>
+  <button id="findBtn" onclick="findMatch()">Find Opponent</button>
+  <button class="secondary" onclick="flipBoard()">Flip Board</button>
+</div>
 
- socket.on("match_found",data=>{
-  gameId=data.game_id;
-  myColor=data.color==="white"?"w":"b";
-  game.load(data.fen);
-  selected=null;legalMoves=[];
-  setStatus("Match found! You are "+data.color+".");
-  socket.emit("join_game",{game_id:gameId});
-  renderBoard();
- });
+<div>
+  <button class="secondary" onclick="resetConnection()">Reconnect</button>
+</div>
 
- socket.on("game_state",data=>{
-  if(data.fen) game.load(data.fen);
-  selected=null;legalMoves=[];
-  renderBoard();
- });
+<p class="note">
+  Tap one of your pieces, then tap its destination square.
+  You can play after an opponent joins.
+</p>
 
- socket.on("error_message",data=>{
-  setStatus(data.message||"An error occurred.");
- });
+<script>
+"use strict";
+
+const SERVER_URL = "https://telegram-chess-bot-7qtq.onrender.com";
+
+const statusBox = document.getElementById("status");
+const boardBox = document.getElementById("board");
+const findBtn = document.getElementById("findBtn");
+const colorInfo = document.getElementById("colorInfo");
+const turnInfo = document.getElementById("turnInfo");
+const promotionBox = document.getElementById("promotionBox");
+
+const game = new Chess();
+
+let socket = null;
+let connected = false;
+let gameId = null;
+let myColor = null;
+let selected = null;
+let legalMoves = [];
+let flipped = false;
+let pendingPromotion = null;
+let searching = false;
+
+function setStatus(message){
+  statusBox.textContent = message;
 }
 
-function findMatch(){
- if(!socket){connectServer();return}
- if(!connected){setStatus("Connecting to server...");return}
- gameId=null;myColor=null;
- game.reset();
- renderBoard();
- socket.emit("find_match");
- setStatus("Searching for an opponent...");
+function pieceImage(piece){
+  const img = document.createElement("img");
+  img.className = "piece-image";
+
+  const color = piece.color === "w" ? "w" : "b";
+  const type = piece.type.toUpperCase();
+
+  img.src =
+    "https://lichess1.org/assets/piece/cburnett/" +
+    color + type + ".svg";
+
+  img.alt =
+    (piece.color === "w" ? "White " : "Black ") +
+    ({
+      k:"king", q:"queen", r:"rook",
+      b:"bishop", n:"knight", p:"pawn"
+    }[piece.type]);
+
+  img.onerror = function(){
+    img.onerror = null;
+    img.src =
+      "https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/" +
+      color + type + ".svg";
+  };
+
+  return img;
 }
 
 function renderBoard(){
- boardBox.innerHTML="";
- const files=flipped?["h","g","f","e","d","c","b","a"]:["a","b","c","d","e","f","g","h"];
- const ranks=flipped?[1,2,3,4,5,6,7,8]:[8,7,6,5,4,3,2,1];
+  boardBox.innerHTML = "";
 
- for(let ri=0;ri<8;ri++){
-  for(let fi=0;fi<8;fi++){
-   const file=files[fi],rank=ranks[ri],sq=file+rank;
-   const el=document.createElement("div");
-   el.className="square "+((ri+fi)%2===0?"light":"dark");
-   if(selected===sq)el.classList.add("selected");
-   if(legalMoves.some(m=>m.to===sq))el.classList.add("legal");
+  const files = flipped
+    ? ["h","g","f","e","d","c","b","a"]
+    : ["a","b","c","d","e","f","g","h"];
 
-   const piece=game.get(sq);
-   if(piece){
-    const img=document.createElement("img");
-img.className="piece-image";
-img.src="https://lichess1.org/assets/piece/cburnett/"+(piece.color==="w"?"w":"b")+piece.type.toUpperCase()+".svg";
-img.alt=piece.color==="w"?"White chess piece":"Black chess piece";
-el.appendChild(img);
-   }
-   el.onclick=()=>clickSquare(sq);
-   boardBox.appendChild(el);
+  const ranks = flipped
+    ? [1,2,3,4,5,6,7,8]
+    : [8,7,6,5,4,3,2,1];
+
+  for(const rank of ranks){
+    for(const file of files){
+      const square = file + rank;
+      const piece = game.get(square);
+
+      const el = document.createElement("div");
+      const fileIndex = file.charCodeAt(0) - 97;
+
+      el.className = "square " +
+        ((fileIndex + rank) % 2 === 0 ? "light" : "dark");
+
+      el.dataset.square = square;
+
+      if(square === selected){
+        el.classList.add("selected");
+      }
+
+      if(legalMoves.some(m => m.to === square)){
+        el.classList.add("legal");
+
+        if(piece){
+          el.classList.add("capture");
+        }
+      }
+
+      if(piece){
+        el.appendChild(pieceImage(piece));
+      }
+
+      el.addEventListener("click", () => onSquareClick(square));
+      boardBox.appendChild(el);
+    }
   }
- }
- updateStatus();
+
+  updateDetails();
 }
 
-function clickSquare(sq){
- if(!gameId||!socket||!connected){
-  setStatus("First connect to a deployed multiplayer server.");
-  return;
- }
- if(game.isGameOver())return;
- if(game.turn()!==myColor){
-  setStatus("Wait for your opponent's move.");
-  return;
- }
+function updateDetails(){
+  colorInfo.textContent =
+    "Color: " +
+    (myColor === "w" ? "White" :
+     myColor === "b" ? "Black" : "—");
 
- const piece=game.get(sq);
- const move=legalMoves.find(m=>m.to===sq);
-
- if(selected&&move){
-  let uci=selected+sq;
-  if(move.promotion)uci+="q";
-  socket.emit("make_move",{game_id:gameId,move:uci});
-  selected=null;legalMoves=[];
-  return;
- }
-
- if(piece&&piece.color===myColor){
-  selected=sq;
-  legalMoves=game.moves({square:sq,verbose:true});
- }else{
-  selected=null;legalMoves=[];
- }
- renderBoard();
+  turnInfo.textContent =
+    "Turn: " + (game.turn() === "w" ? "White" : "Black");
 }
 
-function updateStatus(){
- if(game.isCheckmate()){
-  setStatus("Checkmate! "+(game.turn()==="w"?"Black":"White")+" wins.");
- }else if(game.isDraw()){
-  setStatus("Draw!");
- }else if(game.isCheck()){
-  setStatus((game.turn()==="w"?"White":"Black")+" is in check.");
- }else if(gameId){
-  setStatus((game.turn()===myColor?"Your":"Opponent's")+" turn ("+(game.turn()==="w"?"White":"Black")+")");
- }
+function onSquareClick(square){
+  if(!gameId || !myColor){
+    setStatus("Tap Find Opponent to start a game.");
+    return;
+  }
+
+  if(game.isGameOver()){
+    setStatus("Game over. Tap Find Opponent for a new game.");
+    return;
+  }
+
+  if(game.turn() !== myColor){
+    setStatus("Wait for your opponent's move.");
+    return;
+  }
+
+  if(selected && legalMoves.some(m => m.to === square)){
+    const moves = legalMoves.filter(m => m.to === square);
+
+    if(moves.some(m => m.promotion)){
+      pendingPromotion = {from:selected, to:square};
+      promotionBox.style.display = "block";
+      setStatus("Choose a promotion piece.");
+      return;
+    }
+
+    sendMove(selected, square);
+    return;
+  }
+
+  const piece = game.get(square);
+
+  if(piece && piece.color === myColor){
+    selected = square;
+    legalMoves = game.moves({
+      square:square,
+      verbose:true
+    });
+    renderBoard();
+    return;
+  }
+
+  selected = null;
+  legalMoves = [];
+  renderBoard();
 }
 
-function flipBoard(){flipped=!flipped;renderBoard()}
+function choosePromotion(type){
+  if(!pendingPromotion) return;
 
-findBtn.disabled=false;
- connectServer();
+  const move = pendingPromotion;
+  pendingPromotion = null;
+  promotionBox.style.display = "none";
+
+  sendMove(move.from, move.to, type);
+}
+
+function sendMove(from, to, promotion){
+  if(!socket || !connected || !gameId){
+    setStatus("Connection lost. Reconnect and try again.");
+    return;
+  }
+
+  const move = {from:from, to:to};
+
+  if(promotion){
+    move.promotion = promotion;
+  }
+
+  const legal = game.moves({verbose:true}).some(m =>
+    m.from === from &&
+    m.to === to &&
+    (!m.promotion || m.promotion === promotion)
+  );
+
+  if(!legal){
+    setStatus("That move is not legal.");
+    return;
+  }
+
+  socket.emit("make_move", {
+    game_id:gameId,
+    move:from + to + (promotion || "")
+  });
+
+  selected = null;
+  legalMoves = [];
+  renderBoard();
+  setStatus("Move sent. Waiting for game update...");
+}
+
+function connectServer(){
+  if(socket){
+    if(connected){
+      setStatus("Connected! Tap Find Opponent.");
+    }
+    return;
+  }
+
+  if(typeof io !== "function"){
+    setStatus("Socket.IO library failed to load. Refresh the page.");
+    return;
+  }
+
+  setStatus("Connecting to chess server...");
+
+  socket = io(SERVER_URL, {
+    transports:["websocket","polling"],
+    reconnection:true,
+    reconnectionAttempts:Infinity,
+    timeout:15000
+  });
+
+  socket.on("connect", () => {
+    connected = true;
+    findBtn.disabled = false;
+    setStatus("Connected! Tap Find Opponent.");
+  });
+
+  socket.on("disconnect", () => {
+    connected = false;
+    findBtn.disabled = false;
+    setStatus("Disconnected. Reconnecting...");
+  });
+
+  socket.on("connect_error", () => {
+    connected = false;
+    setStatus("Cannot connect. Server may be waking up. Please wait.");
+  });
+
+  socket.on("waiting", () => {
+    searching = true;
+    findBtn.disabled = false;
+    setStatus("Waiting for an opponent...");
+  });
+
+  socket.on("match_found", data => {
+    gameId = data.game_id;
+    myColor = data.color === "white" ? "w" : "b";
+    searching = false;
+
+    if(data.fen){
+      game.load(data.fen);
+    }
+
+    selected = null;
+    legalMoves = [];
+    pendingPromotion = null;
+    promotionBox.style.display = "none";
+
+    findBtn.disabled = false;
+    findBtn.textContent = "Find Opponent";
+
+    setStatus("Match found! You are " + data.color + ".");
+
+    socket.emit("join_game", {game_id:gameId});
+    renderBoard();
+  });
+
+  socket.on("game_state", data => {
+    if(data.fen){
+      game.load(data.fen);
+    }
+
+    selected = null;
+    legalMoves = [];
+    renderBoard();
+
+    if(data.game_over || game.isGameOver()){
+      setStatus("Game over! Result: " + (data.result || gameResult()));
+    }else{
+      setStatus(
+        game.turn() === myColor
+          ? "Your turn."
+          : "Opponent's turn."
+      );
+    }
+  });
+
+  socket.on("error_message", data => {
+    setStatus(data.message || "An error occurred.");
+  });
+}
+
+function gameResult(){
+  if(game.isCheckmate()){
+    return game.turn() === "w" ? "0-1" : "1-0";
+  }
+
+  if(game.isDraw()){
+    return "½-½";
+  }
+
+  return "Game finished";
+}
+
+function findMatch(){
+  if(!socket){
+    connectServer();
+    setStatus("Connecting to server...");
+    return;
+  }
+
+  if(!connected){
+    setStatus("Still connecting. Please wait and tap again.");
+    return;
+  }
+
+  if(searching){
+    setStatus("Already searching for an opponent...");
+    return;
+  }
+
+  gameId = null;
+  myColor = null;
+  selected = null;
+  legalMoves = [];
+  pendingPromotion = null;
+
+  game.reset();
+  promotionBox.style.display = "none";
+
+  renderBoard();
+
+  searching = true;
+  findBtn.textContent = "Searching...";
+  setStatus("Searching for an opponent...");
+
+  socket.emit("find_match");
+}
+
+function flipBoard(){
+  flipped = !flipped;
+  renderBoard();
+}
+
+function resetConnection(){
+  if(socket){
+    socket.removeAllListeners();
+    socket.disconnect();
+    socket = null;
+  }
+
+  connected = false;
+  gameId = null;
+  myColor = null;
+  searching = false;
+  selected = null;
+  legalMoves = [];
+  pendingPromotion = null;
+
+  game.reset();
+  promotionBox.style.display = "none";
+  findBtn.textContent = "Find Opponent";
+
+  renderBoard();
+  setStatus("Reconnecting to chess server...");
+  connectServer();
+}
+
+findBtn.disabled = false;
 renderBoard();
-</script></body>
+connectServer();
+</script>
+
+</body>
 </html>
