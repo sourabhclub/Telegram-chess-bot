@@ -69,10 +69,15 @@ let connected=false;
 function setStatus(text){statusBox.textContent=text}
 
 function connectServer(){
- if(socket) return;
- const serverUrl=prompt("Enter your deployed chess server URL (https://...)");
- if(!serverUrl) return;
- socket=io(serverUrl,{transports:["websocket","polling"]});
+if(socket) return;
+let serverUrl=localStorage.getItem("chessServerUrl");
+if(!serverUrl){
+serverUrl=prompt("Enter your deployed chess server URL (https://...)");
+if(!serverUrl) return;
+serverUrl=serverUrl.trim().replace(//+$/,"");
+localStorage.setItem("chessServerUrl",serverUrl);
+}
+socket=io(serverUrl,{transports:["websocket","polling"]});
 
  socket.on("connect",()=>{
   connected=true;
