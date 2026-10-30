@@ -136,7 +136,7 @@ function renderBoard(){
    if(piece){
     const img=document.createElement("img");
 img.className="piece-image";
-img.src="https://lichess1.org/assets/piece/cburnett/"+piece.color+piece.type+".svg";
+img.src="https://lichess1.org/assets/piece/cburnett/"+(piece.color==="w"?"w":"b")+piece.type.toUpperCase()+".svg";
 img.alt=piece.color==="w"?"White chess piece":"Black chess piece";
 el.appendChild(img);
    }
