@@ -319,8 +319,8 @@ function onSquareClick(square){
   }
 
   if(game.turn() !== myColor){
-    setStatus("Opponent's turn.");
-    return;
+  setStatus("Turn mismatch: game=" + game.turn() + ", player=" + myColor);
+  return;
   }
 
   const piece = game.get(square);
