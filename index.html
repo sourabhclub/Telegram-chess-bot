@@ -59,14 +59,12 @@ let flipped = false;
 let pendingPromotion = null;
 let searching = false;
 
-// Keep the same identity across refreshes/reconnects in this browser.
-let playerToken = localStorage.getItem("sourabhChessPlayerToken");
-if (!playerToken) {
-  playerToken = (window.crypto && crypto.randomUUID)
-    ? crypto.randomUUID()
-    : "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
-  localStorage.setItem("sourabhChessPlayerToken", playerToken);
-}
+// Create a fresh player identity whenever the site page is opened.
+// Socket reconnects within this same page keep this token, so an interrupted
+// game can be resumed. A full page reload/open gets a new token and starts fresh.
+const playerToken = (window.crypto && crypto.randomUUID)
+  ? crypto.randomUUID()
+  : "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
 
 function setStatus(message){ statusBox.textContent = message; }
 function pieceImage(piece){
