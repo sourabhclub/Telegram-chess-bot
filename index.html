@@ -4,215 +4,53 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Sourabh Chess</title>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
 <style>
 *{box-sizing:border-box}
-
-body{
-  margin:0;
-  padding:16px 10px 30px;
-  background:#101820;
-  color:white;
-  font-family:Arial,sans-serif;
-  text-align:center;
-}
-
-h1{
-  color:#8de0b2;
-  margin:4px 0;
-  font-size:30px;
-}
-
-.subtitle{
-  color:#bdcbd5;
-  margin:6px 0 16px;
-}
-
-#status{
-  background:#202d38;
-  border:1px solid #354653;
-  padding:13px 10px;
-  border-radius:10px;
-  margin:12px auto;
-  max-width:440px;
-  min-height:45px;
-  font-size:14px;
-}
-
-#board{
-  width:min(94vw,440px);
-  height:min(94vw,440px);
-  display:grid;
-  grid-template-columns:repeat(8,minmax(0,1fr));
-  grid-template-rows:repeat(8,minmax(0,1fr));
-  margin:14px auto;
-  border:3px solid #d5dce0;
-  border-radius:2px;
-  overflow:hidden;
-  touch-action:manipulation;
-}
-
-.square{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-width:0;
-  min-height:0;
-  cursor:pointer;
-  user-select:none;
-  -webkit-tap-highlight-color:transparent;
-}
-
-  .square.in-check {
-background: #ff3333 !important;
-box-shadow: inset 0 0 0 4px #b30000;
-  }
-.light{background:#eeeed2}
-.dark{background:#769656}
-
-.square.selected{
-  background:#f6f669!important;
-}
-
-.piece-image{
-  width:94%;
-  height:94%;
-  object-fit:contain;
-  pointer-events:none;
-  user-select:none;
-  -webkit-user-drag:none;
-}
-
-.legal::after{
-  content:"";
-  position:absolute;
-  width:25%;
-  height:25%;
-  border-radius:50%;
-  background:#203b3280;
-  pointer-events:none;
-}
-
-.legal.capture::after{
-  width:85%;
-  height:85%;
-  background:transparent;
-  border:4px solid #203b3280;
-}
-
-button{
-  background:#8de0b2;
-  color:#10251b;
-  border:0;
-  border-radius:9px;
-  padding:13px 17px;
-  margin:5px 3px;
-  font-size:15px;
-  font-weight:bold;
-  cursor:pointer;
-  min-height:44px;
-}
-
-button:disabled{
-  opacity:.5;
-  cursor:default;
-}
-
-.secondary{
-  background:#354653;
-  color:white;
-}
-
-#details{
-  max-width:440px;
-  margin:10px auto;
-  display:flex;
-  justify-content:space-between;
-  gap:8px;
-  font-size:13px;
-  color:#d0dbe2;
-}
-
-.note{
-  color:#9fb0bc;
-  font-size:12px;
-  line-height:1.5;
-  max-width:440px;
-  margin:12px auto;
-}
-
-#promotionBox{
-  display:none;
-  margin:10px auto;
-}
-
-#promotionBox button{
-  padding:8px 13px;
-  font-size:22px;
-}
-
-@media(max-width:360px){
-  h1{font-size:26px}
-  button{padding:11px 12px;font-size:14px}
-}
+body{margin:0;padding:16px 10px 30px;background:#101820;color:white;font-family:Arial,sans-serif;text-align:center}
+h1{color:#8de0b2;margin:4px 0;font-size:30px}
+.subtitle{color:#bdcbd5;margin:6px 0 16px}
+#status{background:#202d38;border:1px solid #354653;padding:13px 10px;border-radius:10px;margin:12px auto;max-width:440px;min-height:45px;font-size:14px;overflow-wrap:anywhere}
+#board{width:min(94vw,440px);height:min(94vw,440px);display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));margin:14px auto;border:3px solid #d5dce0;border-radius:2px;overflow:hidden;touch-action:manipulation}
+.square{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.light{background:#eeeed2}.dark{background:#769656}
+.square.in-check{background:#ff3333!important;box-shadow:inset 0 0 0 4px #b30000}
+.square.selected{background:#f6f669!important}
+.piece-image{width:94%;height:94%;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none}
+.legal::after{content:"";position:absolute;width:25%;height:25%;border-radius:50%;background:#203b3280;pointer-events:none}
+.legal.capture::after{width:85%;height:85%;background:transparent;border:4px solid #203b3280}
+button{background:#8de0b2;color:#10251b;border:0;border-radius:9px;padding:13px 17px;margin:5px 3px;font-size:15px;font-weight:bold;cursor:pointer;min-height:44px}
+button:disabled{opacity:.5;cursor:default}.secondary{background:#354653;color:white}
+#details{max-width:440px;margin:10px auto;display:flex;justify-content:space-between;gap:8px;font-size:13px;color:#d0dbe2}
+.note{color:#9fb0bc;font-size:12px;line-height:1.5;max-width:440px;margin:12px auto}
+#promotionBox{display:none;margin:10px auto}#promotionBox button{padding:8px 13px;font-size:22px}
+@media(max-width:360px){h1{font-size:26px}button{padding:11px 12px;font-size:14px}}
 </style>
 </head>
-
 <body>
-
 <h1>♟ Chess Arena</h1>
 <p class="subtitle">Online Multiplayer Chess</p>
-
 <div id="status">Connecting to chess server...</div>
-
-<div id="details">
-  <span id="colorInfo">Color: —</span>
-  <span id="turnInfo">Turn: White</span>
-</div>
-
+<div id="details"><span id="colorInfo">Color: —</span><span id="turnInfo">Turn: White</span></div>
 <div id="board" aria-label="Chess board"></div>
-
-<div id="promotionBox">
-  <p>Choose promotion:</p>
-  <button onclick="choosePromotion('q')">♕</button>
-  <button onclick="choosePromotion('r')">♖</button>
-  <button onclick="choosePromotion('b')">♗</button>
-  <button onclick="choosePromotion('n')">♘</button>
-</div>
-
-<div>
-  <button id="findBtn" onclick="findMatch()">Find Opponent</button>
-  <button class="secondary" onclick="flipBoard()">Flip Board</button>
-</div>
-
-<div>
-  <button class="secondary" onclick="resetConnection()">Reconnect</button>
-</div>
-
-<p class="note">
-  Tap one of your pieces, then tap its destination square.
-  You can play after an opponent joins.
-</p>
-
+<div id="promotionBox"><p>Choose promotion:</p><button onclick="choosePromotion('q')">♕</button><button onclick="choosePromotion('r')">♖</button><button onclick="choosePromotion('b')">♗</button><button onclick="choosePromotion('n')">♘</button></div>
+<div><button id="findBtn" onclick="findMatch()">Find Opponent</button><button class="secondary" onclick="flipBoard()">Flip Board</button></div>
+<div><button class="secondary" onclick="resetConnection()">Reconnect</button></div>
+<p class="note">Tap one of your pieces, then tap its destination square. If your connection drops, reconnect using the same browser to return to your current game.</p>
 <script>
 "use strict";
-
 const SERVER_URL = "https://telegram-chess-bot-7qtq.onrender.com";
-
 const statusBox = document.getElementById("status");
 const boardBox = document.getElementById("board");
 const findBtn = document.getElementById("findBtn");
 const colorInfo = document.getElementById("colorInfo");
 const turnInfo = document.getElementById("turnInfo");
 const promotionBox = document.getElementById("promotionBox");
-
 const game = new Chess();
-
 let socket = null;
 let connected = false;
+let registered = false;
 let gameId = null;
 let myColor = null;
 let selected = null;
@@ -221,380 +59,192 @@ let flipped = false;
 let pendingPromotion = null;
 let searching = false;
 
-function setStatus(message){
-  statusBox.textContent = message;
+// Keep the same identity across refreshes/reconnects in this browser.
+let playerToken = localStorage.getItem("sourabhChessPlayerToken");
+if (!playerToken) {
+  playerToken = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+  localStorage.setItem("sourabhChessPlayerToken", playerToken);
 }
 
+function setStatus(message){ statusBox.textContent = message; }
 function pieceImage(piece){
   const img = document.createElement("img");
   img.className = "piece-image";
-
   const color = piece.color === "w" ? "w" : "b";
   const type = piece.type.toUpperCase();
-
-  img.src =
-    "https://lichess1.org/assets/piece/cburnett/" +
-    color + type + ".svg";
-
-  img.alt =
-    (piece.color === "w" ? "White " : "Black ") +
-    ({
-      k:"king", q:"queen", r:"rook",
-      b:"bishop", n:"knight", p:"pawn"
-    }[piece.type]);
-
+  img.src = "https://lichess1.org/assets/piece/cburnett/" + color + type + ".svg";
+  img.alt = (piece.color === "w" ? "White " : "Black ") + ({k:"king",q:"queen",r:"rook",b:"bishop",n:"knight",p:"pawn"}[piece.type]);
   img.onerror = function(){
     img.onerror = null;
-    img.src =
-      "https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/" +
-      color + type + ".svg";
+    img.src = "https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/" + color + type + ".svg";
   };
-
   return img;
 }
-
 function renderBoard(){
   boardBox.innerHTML = "";
-
-  const files = flipped
-    ? ["h","g","f","e","d","c","b","a"]
-    : ["a","b","c","d","e","f","g","h"];
-
-  const ranks = flipped
-    ? [1,2,3,4,5,6,7,8]
-    : [8,7,6,5,4,3,2,1];
-
-  for(const rank of ranks){
-    for(const file of files){
+  const files = flipped ? ["h","g","f","e","d","c","b","a"] : ["a","b","c","d","e","f","g","h"];
+  const ranks = flipped ? [1,2,3,4,5,6,7,8] : [8,7,6,5,4,3,2,1];
+  let kingSquare = null;
+  if (game.in_check()) {
+    const colorToMove = game.turn();
+    for (const f of "abcdefgh") {
+      for (let r = 1; r <= 8; r++) {
+        const p = game.get(f + r);
+        if (p && p.type === "k" && p.color === colorToMove) kingSquare = f + r;
+      }
+    }
+  }
+  for (const rank of ranks) {
+    for (const file of files) {
       const square = file + rank;
       const piece = game.get(square);
-     
       const el = document.createElement("div");
       const fileIndex = file.charCodeAt(0) - 97;
-
-      el.className = "square " +
-        ((fileIndex + rank) % 2 === 0 ? "light" : "dark");
-
-      if (game.in_check() && piece && piece.type === "k" && piece.color === game.turn()) {
-    el.classList.add("in-check");
-      }
-      }
+      el.className = "square " + ((fileIndex + rank) % 2 === 0 ? "light" : "dark");
       el.dataset.square = square;
-
-      if(square === selected){
-        el.classList.add("selected");
-      }
-
-      if(legalMoves.some(m => m.to === square)){
+      if (square === kingSquare) el.classList.add("in-check");
+      if (square === selected) el.classList.add("selected");
+      if (legalMoves.some(m => m.to === square)) {
         el.classList.add("legal");
-
-        if(piece){
-          el.classList.add("capture");
-        }
+        if (piece) el.classList.add("capture");
       }
-
-      if(piece){
-        el.appendChild(pieceImage(piece));
-      }
-
-      el.addEventListener("click", () => {
-  onSquareClick(square);
-});
+      if (piece) el.appendChild(pieceImage(piece));
+      el.addEventListener("click", () => onSquareClick(square));
       boardBox.appendChild(el);
     }
   }
-
   updateDetails();
 }
-
 function updateDetails(){
-  colorInfo.textContent =
-    "Color: " +
-    (myColor === "w" ? "White" :
-     myColor === "b" ? "Black" : "—");
-
-  turnInfo.textContent =
-    "Turn: " + (game.turn() === "w" ? "White" : "Black");
+  colorInfo.textContent = "Color: " + (myColor === "w" ? "White" : myColor === "b" ? "Black" : "—");
+  turnInfo.textContent = "Turn: " + (game.turn() === "w" ? "White" : "Black");
 }
-
+function applyGameData(data){
+  if (data.game_id) gameId = data.game_id;
+  if (data.color) myColor = data.color === "white" ? "w" : data.color === "black" ? "b" : data.color;
+  if (data.fen) game.load(data.fen);
+  selected = null; legalMoves = []; pendingPromotion = null;
+  promotionBox.style.display = "none";
+  searching = false;
+  findBtn.disabled = false;
+  findBtn.textContent = "Find Opponent";
+  renderBoard();
+  if (data.game_over || game.game_over()) setStatus("Game over! Result: " + (data.result || gameResult()));
+  else if (game.in_check()) setStatus(game.turn() === myColor ? "Check! Your king is under attack." : "Check! Opponent's king is under attack.");
+  else setStatus(game.turn() === myColor ? "Game restored. Your turn." : "Game restored. Opponent's turn.");
+}
 function onSquareClick(square){
-  setStatus("Tap: " + square + " | gameId: " + gameId + " | myColor: " + myColor + " | turn: " + game.turn());
-  if(!gameId || !myColor){
-    setStatus("Game not started. Find an opponent first.");
-    return;
-  }
-
-  if(game.game_over()){
-    setStatus("Game over. Find an opponent for a new game.");
-    return;
-  }
-
-  if(game.turn() !== myColor){
-  setStatus("Turn mismatch: game=" + game.turn() + ", player=" + myColor);
-  return;
-  }
-
+  if (!gameId || !myColor) { setStatus("Game not started. Find an opponent first."); return; }
+  if (game.game_over()) { setStatus("Game over. Find an opponent for a new game."); return; }
+  if (game.turn() !== myColor) { setStatus("It's the opponent's turn."); return; }
   const piece = game.get(square);
-
-  // If a piece is already selected, try moving it.
-  if(selected && legalMoves.some(m => m.to === square)){
+  if (selected && legalMoves.some(m => m.to === square)) {
     const moves = legalMoves.filter(m => m.to === square);
-
-    if(moves.some(m => m.promotion)){
-      pendingPromotion = {from:selected, to:square};
+    if (moves.some(m => m.promotion)) {
+      pendingPromotion = {from:selected,to:square};
       promotionBox.style.display = "block";
       setStatus("Choose a promotion piece.");
       return;
     }
-
     sendMove(selected, square);
     return;
   }
-
-  // Select your own piece.
-  if(piece && piece.color === myColor){
-    setStatus("Piece found: " + square + ", piece=" + piece.type + ", color=" + piece.color);
+  if (piece && piece.color === myColor) {
     selected = square;
-    legalMoves = game.moves({
-      square: square,
-      verbose: true
-    });
-
+    legalMoves = game.moves({square:square, verbose:true});
     renderBoard();
     setStatus("Selected " + square + ". Choose a highlighted square.");
     return;
   }
-
-  // Deselect when an invalid square is tapped.
-  selected = null;
-  legalMoves = [];
-  renderBoard();
-  setStatus("Select one of your own pieces.");
-  }
-
+  selected = null; legalMoves = []; renderBoard(); setStatus("Select one of your own pieces.");
+}
 function choosePromotion(type){
-  if(!pendingPromotion) return;
-
+  if (!pendingPromotion) return;
   const move = pendingPromotion;
   pendingPromotion = null;
   promotionBox.style.display = "none";
-
   sendMove(move.from, move.to, type);
 }
-
-function sendMove(from, to, promotion){
-  if(!socket || !connected || !gameId){
-    setStatus("Connection lost. Reconnect and try again.");
-    return;
-  }
-
-  const move = {from:from, to:to};
-
-  if(promotion){
-    move.promotion = promotion;
-  }
-
-  const legal = game.moves({verbose:true}).some(m =>
-    m.from === from &&
-    m.to === to &&
-    (!m.promotion || m.promotion === promotion)
-  );
-
-  if(!legal){
-    setStatus("That move is not legal.");
-    return;
-  }
-
-  socket.emit("make_move", {
-    game_id:gameId,
-    move:from + to + (promotion || "")
-  });
-
-  selected = null;
-  legalMoves = [];
-  renderBoard();
-  setStatus("Move sent. Waiting for game update...");
+function sendMove(from,to,promotion){
+  if (!socket || !connected || !registered || !gameId) { setStatus("Connection lost. Tap Reconnect, then try again."); return; }
+  const legal = game.moves({square:from, verbose:true}).some(m => m.from === from && m.to === to && (!m.promotion || m.promotion === promotion));
+  if (!legal) { setStatus("That move is not legal."); return; }
+  socket.emit("make_move", {game_id:gameId, move:from + to + (promotion || "")});
+  selected = null; legalMoves = []; renderBoard(); setStatus("Move sent. Waiting for game update...");
 }
-
 function connectServer(){
-  if(socket){
-    if(connected){
-      setStatus("Connected! Tap Find Opponent.");
-    }
-    return;
-  }
-
-  if(typeof io !== "function"){
-    setStatus("Socket.IO library failed to load. Refresh the page.");
-    return;
-  }
-
+  if (socket) { if (connected && registered) setStatus(gameId ? "Connected to your game." : "Connected! Tap Find Opponent."); return; }
+  if (typeof io !== "function") { setStatus("Socket.IO library failed to load. Refresh the page."); return; }
   setStatus("Connecting to chess server...");
-
-  socket = io(SERVER_URL, {
-    transports:["websocket","polling"],
-    reconnection:true,
-    reconnectionAttempts:Infinity,
-    timeout:15000
-  });
-
+  socket = io(SERVER_URL, {transports:["websocket","polling"], reconnection:true, reconnectionAttempts:Infinity, timeout:20000});
   socket.on("connect", () => {
-    connected = true;
-    findBtn.disabled = false;
-    setStatus("Connected! Tap Find Opponent.");
+    connected = true; registered = false; findBtn.disabled = true;
+    setStatus("Connected. Restoring your session...");
+    socket.emit("register_player", {player_token:playerToken});
   });
-
+  socket.on("session_ready", () => {
+    registered = true; findBtn.disabled = false;
+    if (!gameId) setStatus("Connected! Tap Find Opponent.");
+  });
   socket.on("disconnect", () => {
-    connected = false;
-    findBtn.disabled = false;
-    setStatus("Disconnected. Reconnecting...");
+    connected = false; registered = false; findBtn.disabled = true;
+    setStatus("Connection dropped. Reconnecting; your game is being kept on the server...");
   });
-
   socket.on("connect_error", () => {
-    connected = false;
-    setStatus("Cannot connect. Server may be waking up. Please wait.");
+    connected = false; registered = false; findBtn.disabled = true;
+    setStatus("Cannot connect yet. Server may be waking up; retrying...");
   });
-
   socket.on("waiting", () => {
-    searching = true;
-    findBtn.disabled = false;
+    searching = true; findBtn.disabled = false; findBtn.textContent = "Searching...";
     setStatus("Waiting for an opponent...");
   });
-
   socket.on("match_found", data => {
-    gameId = data.game_id;
-    myColor = data.color === "white" ? "w" : "b";
-    searching = false;
-
-    if(data.fen){
-      game.load(data.fen);
-    }
-
-    selected = null;
-    legalMoves = [];
-    pendingPromotion = null;
-    promotionBox.style.display = "none";
-
-    findBtn.disabled = false;
-    findBtn.textContent = "Find Opponent";
-
+    applyGameData(data);
     setStatus("Match found! You are " + data.color + ".");
-
     socket.emit("join_game", {game_id:gameId});
-    renderBoard();
   });
-
+  socket.on("resume_game", data => {
+    applyGameData(data);
+    setStatus("Reconnected to your existing game. " + (game.turn() === myColor ? "Your turn." : "Opponent's turn."));
+  });
   socket.on("game_state", data => {
-    if(data.fen){
-      game.load(data.fen);
-    }
-
-    selected = null;
-    legalMoves = [];
-    renderBoard();
-
-    if(data.game_over || game.game_over()){
-      setStatus("Game over! Result: " + (data.result || gameResult()));
-    }else if(game.isCheck()){
-    setStatus(
-        game.turn() === myColor
-            ? "Check! Your king is under attack."
-            : "Check! Opponent's king is under attack."
-    );
-}else{
-    setStatus(
-        game.turn() === myColor
-            ? "Your turn."
-            : "Opponent's turn."
-    );
-    }
+    if (data.game_id) gameId = data.game_id;
+    if (data.fen) game.load(data.fen);
+    selected = null; legalMoves = []; renderBoard();
+    if (data.game_over || game.game_over()) setStatus("Game over! Result: " + (data.result || gameResult()));
+    else if (game.in_check()) setStatus(game.turn() === myColor ? "Check! Your king is under attack." : "Check! Opponent's king is under attack.");
+    else setStatus(game.turn() === myColor ? "Your turn." : "Opponent's turn.");
   });
-
-  socket.on("error_message", data => {
-    setStatus(data.message || "An error occurred.");
-  });
+  socket.on("error_message", data => { setStatus((data && data.message) || "An error occurred."); });
 }
-
 function gameResult(){
-  if(game.isCheckmate()){
-    return game.turn() === "w" ? "0-1" : "1-0";
-  }
-
-  if(game.isDraw()){
-    return "½-½";
-  }
-
+  if (game.in_checkmate()) return game.turn() === "w" ? "0-1" : "1-0";
+  if (game.in_draw()) return "½-½";
   return "Game finished";
 }
-
 function findMatch(){
-  if(!socket){
-    connectServer();
-    setStatus("Connecting to server...");
-    return;
-  }
-
-  if(!connected){
-    setStatus("Still connecting. Please wait and tap again.");
-    return;
-  }
-
-  if(searching){
-    setStatus("Already searching for an opponent...");
-    return;
-  }
-
-  gameId = null;
-  myColor = null;
-  selected = null;
-  legalMoves = [];
-  pendingPromotion = null;
-
-  game.reset();
-  promotionBox.style.display = "none";
-
-  renderBoard();
-
-  searching = true;
-  findBtn.textContent = "Searching...";
-  setStatus("Searching for an opponent...");
-
+  if (!socket || !connected) { connectServer(); setStatus("Connecting to server. Please wait, then tap Find Opponent."); return; }
+  if (!registered) { setStatus("Restoring your session. Please wait a moment."); return; }
+  if (searching) { setStatus("Already searching for an opponent..."); return; }
+  if (gameId) { setStatus("You are already in a game. Use Reconnect only if the board is out of sync."); return; }
+  game.reset(); myColor = null; selected = null; legalMoves = []; pendingPromotion = null;
+  promotionBox.style.display = "none"; renderBoard();
+  searching = true; findBtn.textContent = "Searching..."; setStatus("Searching for an opponent...");
   socket.emit("find_match");
 }
-
-function flipBoard(){
-  flipped = !flipped;
-  renderBoard();
-}
-
+function flipBoard(){ flipped = !flipped; renderBoard(); }
 function resetConnection(){
-  if(socket){
-    socket.removeAllListeners();
-    socket.disconnect();
-    socket = null;
-  }
-
-  connected = false;
-  gameId = null;
-  myColor = null;
-  searching = false;
-  selected = null;
-  legalMoves = [];
-  pendingPromotion = null;
-
-  game.reset();
-  promotionBox.style.display = "none";
-  findBtn.textContent = "Find Opponent";
-
-  renderBoard();
-  setStatus("Reconnecting to chess server...");
+  if (socket) { socket.disconnect(); socket = null; }
+  connected = false; registered = false; searching = false;
+  findBtn.disabled = true;
+  setStatus("Reconnecting to chess server and restoring your game...");
   connectServer();
 }
-
-findBtn.disabled = false;
+findBtn.disabled = true;
 renderBoard();
 connectServer();
 </script>
-
 </body>
 </html>
