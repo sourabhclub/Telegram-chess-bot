@@ -42,7 +42,7 @@ def find_match():
     global waiting_player
 
     sid = request.sid
-sid_to_player[sid] = sid
+    sid_to_player[sid] = sid
     if waiting_player and waiting_player != sid:
         white_sid = waiting_player
         black_sid = sid
